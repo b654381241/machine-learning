@@ -1,6 +1,6 @@
 # 机器学习Algorithm
 
-## 聚类
+聚类
 
 ### kmeans
 
@@ -203,6 +203,218 @@ DBSCAN 最大的缺点是当集群的密度变化时，它表现的不像其他�
 3. 重复步骤2知道所有的数据点合并成一个簇，然后选择我们需要多少个簇。
 
 层次聚类优点：（1）不需要知道有多少个簇 （2）对于距离度量标准的选择并不敏感
+
+
+
+### 谱聚类
+
+#### 1.1 谱和谱聚类
+
+##### 1.1.1 谱
+
+方阵作为线性算子，它的所有特征值的全体统称为方阵的谱。方阵的谱半径为最大的特征值。矩阵A的谱半径是矩阵![A^TA](algorithm.assets/gif-1598506970556.gif)的最大特征值。
+
+##### 1.1.2 谱聚类
+
+谱聚类是一种基于图论的聚类方法，通过对样本数据的拉普拉斯矩阵的特征向量进行聚类，从而达到对样本数据聚类的母的。谱聚类可以理解为将高维空间的数据映射到低维，然后在低维空间用其它聚类算法（如KMeans）进行聚类。
+
+##### 1.2 谱聚类算法简单描述
+
+输入：n个样本点![X=\left \{ x{_{1}},x{_{2}},...,x{_{n}} \right \}](https://private.codecogs.com/gif.latex?X%3D%5Cleft%20%5C%7B%20x%7B_%7B1%7D%7D%2Cx%7B_%7B2%7D%7D%2C...%2Cx%7B_%7Bn%7D%7D%20%5Cright%20%5C%7D)和聚类簇的数目k；
+
+输出：聚类簇![A{_{1}},A{_{2}},...,A{_{k}}](algorithm.assets/gif.gif)
+
+（1）使用下面公式计算![n*n](algorithm.assets/gif-1598506969103.gif)的相似度矩阵W；
+
+​                                 ![s{_{ij}}=s(x{_{i}},x{_{j}})=\sum_{i=1,j=1}^{n}exp\frac{-||x{_{i}}-x{_{j}}||^2}{2\sigma ^2}](https://private.codecogs.com/gif.latex?s%7B_%7Bij%7D%7D%3Ds%28x%7B_%7Bi%7D%7D%2Cx%7B_%7Bj%7D%7D%29%3D%5Csum_%7Bi%3D1%2Cj%3D1%7D%5E%7Bn%7Dexp%5Cfrac%7B-%7C%7Cx%7B_%7Bi%7D%7D-x%7B_%7Bj%7D%7D%7C%7C%5E2%7D%7B2%5Csigma%20%5E2%7D)
+
+W为![s{_{ij}}](algorithm.assets/gif-1598506969295.gif)组成的相似度矩阵。
+
+（2）使用下面公式计算度矩阵D；
+
+​                                ![d{_{i}}=\sum_{j=1}^{n}w{_{ij}}](algorithm.assets/gif-1598506969358.gif)，即相似度矩阵W的每一行元素之和
+
+D为![d{_{i}}](algorithm.assets/gif-1598506969455.gif)组成的![n*n](algorithm.assets/gif-1598506969103.gif)对角矩阵。
+
+（3）计算拉普拉斯矩阵![L=D-W](algorithm.assets/gif-1598506969512.gif)；
+
+（4）计算L的特征值，将特征值从小到大排序，取前k个特征值，并计算前k个特征值的特征向量![u{_{1}},u{_{2}},...,u{_{k}}](algorithm.assets/gif-1598506969559.gif)；
+
+（5）将上面的k个列向量组成矩阵![U=\left \{ u{_{1}},u{_{2}},...,u{_{k}} \right \}](https://private.codecogs.com/gif.latex?U%3D%5Cleft%20%5C%7B%20u%7B_%7B1%7D%7D%2Cu%7B_%7B2%7D%7D%2C...%2Cu%7B_%7Bk%7D%7D%20%5Cright%20%5C%7D)，![U\in R^{n*k}](https://private.codecogs.com/gif.latex?U%5Cin%20R%5E%7Bn*k%7D)；
+
+（6）令![y{_{i}}\in R^k](https://private.codecogs.com/gif.latex?y%7B_%7Bi%7D%7D%5Cin%20R%5Ek)是![U](algorithm.assets/gif-1598506969806.gif)的第![i](algorithm.assets/gif-1598506970723.gif)行的向量，其中![i=1,2,...,n](algorithm.assets/gif-1598506970459.gif)；
+
+（7）使用k-means算法将新样本点![Y=\left \{ y{_{1}},y{_{2}},...,y{_{n}} \right \}](https://private.codecogs.com/gif.latex?Y%3D%5Cleft%20%5C%7B%20y%7B_%7B1%7D%7D%2Cy%7B_%7B2%7D%7D%2C...%2Cy%7B_%7Bn%7D%7D%20%5Cright%20%5C%7D)聚类成簇![C{_{1}},C{_{2}},...,C{_{k}}](algorithm.assets/gif-1598506970425.gif)；
+
+（8）输出簇![A{_{1}},A{_{2}},...,A{_{k}}](https://private.codecogs.com/gif.latex?A%7B_%7B1%7D%7D%2CA%7B_%7B2%7D%7D%2C...%2CA%7B_%7Bk%7D%7D)，其中，![A{_{i}}=\left \{ j|y{_{j}} \in C{_{i}}\right \}](https://private.codecogs.com/gif.latex?A%7B_%7Bi%7D%7D%3D%5Cleft%20%5C%7B%20j%7Cy%7B_%7Bj%7D%7D%20%5Cin%20C%7B_%7Bi%7D%7D%5Cright%20%5C%7D).
+
+上面就是未标准化的谱聚类算法的描述。也就是先根据样本点计算相似度矩阵，然后计算度矩阵和拉普拉斯矩阵，接着计算拉普拉斯矩阵前k个特征值对应的特征向量，最后将这k个特征值对应的特征向量组成![n*k](algorithm.assets/gif-1598506970587.gif)的矩阵U，U的每一行成为一个新生成的样本点，对这些新生成的样本点进行k-means聚类，聚成k类，最后输出聚类的结果。这就是谱聚类算法的基本思想。相比较PCA降维中取前k大的特征值对应的特征向量，这里取得是前k小的特征值对应的特征向量。但是上述的谱聚类算法并不是最优的，接下来我们一步一步的分解上面的步骤，总结一下在此基础上进行优化的谱聚类的版本。
+
+#### 1.3 谱聚类算法中的重要属性
+
+##### 1.3.1 相似度矩阵介绍
+
+相似度矩阵就是样本点中的任意两个点之间的距离度量，在聚类算法中可以表示为距离近的点它们之间的相似度比较高，而距离较远的点它们的相似度比较低，甚至可以忽略。这里用三种方式表示相似度矩阵：一是![\epsilon](algorithm.assets/gif-1598506970667.gif)-近邻法（![\epsilon](algorithm.assets/gif-1598506970667.gif)-neighborhood graph），二是k近邻法（k-nearest nerghbor graph），三是全连接法（fully connected graph）。下面我们来介绍这三种方法。
+
+**（1）![\epsilon](https://private.codecogs.com/gif.latex?%5Cepsilon)-neighborhood graph：**
+
+​                                   ![s{_{ij}}=||x{_{i}}-x{_{j}}||^2](algorithm.assets/gif-1598506970724.gif)，表示样本点中任意两点之间的欧式距离
+
+用此方法构造的相似度矩阵表示如下：
+
+​                                  ![W{_{ij}}=\begin{cases} 0& \text{ if } s{_{ij}}>\epsilon \\ \epsilon & \text{ if } s{_{ij}}\leq \epsilon \end{cases}](https://private.codecogs.com/gif.latex?W%7B_%7Bij%7D%7D%3D%5Cbegin%7Bcases%7D%200%26%20%5Ctext%7B%20if%20%7D%20s%7B_%7Bij%7D%7D%3E%5Cepsilon%20%5C%5C%20%5Cepsilon%20%26%20%5Ctext%7B%20if%20%7D%20s%7B_%7Bij%7D%7D%5Cleq%20%5Cepsilon%20%5Cend%7Bcases%7D)
+
+该相似度矩阵由于距离近的点的距离表示为![\epsilon](https://private.codecogs.com/gif.latex?%5Cepsilon)，距离远的点距离表示为0，矩阵种没有携带关于数据集的太多的信息，所以该方法一般很少使用，在sklearn中也没有使用该方法。
+
+**（2）k-nearest nerghbor graph：**
+
+由于每个样本点的k个近邻可能不是完全相同的，所以用此方法构造的相似度矩阵并不是对称的。因此，这里使用两种方式表示对称的knn相似度矩阵，第一种方式是如果![v{_{i}}](algorithm.assets/gif-1598506971551.gif)在![v{_{j}}](algorithm.assets/gif-1598506970840.gif)的k个领域中或者![v{_{j}}](algorithm.assets/gif-1598506970840.gif)在![v{_{i}}](algorithm.assets/gif-1598506971551.gif)的k个领域中，则![w{_{ij}}=w{_{ji}}](algorithm.assets/gif-1598506970978.gif)为![v{_{i}}](algorithm.assets/gif-1598506971551.gif)与![v{_{j}}](algorithm.assets/gif-1598506970840.gif)之间的距离，否则为![w{_{ij}}=w{_{ji}}=0](algorithm.assets/gif-1598506970998.gif)；第二种方式是如果![v{_{i}}](algorithm.assets/gif-1598506971551.gif)在![v{_{j}}](algorithm.assets/gif-1598506970840.gif)的k个领域中并且![v{_{j}}](algorithm.assets/gif-1598506970840.gif)在![v{_{i}}](algorithm.assets/gif-1598506971551.gif)的k个领域中，则![w{_{ij}}=w{_{ji}}](algorithm.assets/gif-1598506970978.gif)为![v{_{i}}](algorithm.assets/gif-1598506971551.gif)与![v{_{j}}](algorithm.assets/gif-1598506970840.gif)之间的距离，否则为![w{_{ij}}=w{_{ji}}=0](algorithm.assets/gif-1598506970998.gif)。很显然第二种方式比第一种方式生成的相似度矩阵要稀疏。这两种方式用公式表达如下：
+
+第一种方式：
+
+​                       ![W{_{ij}}=W{_{ji}}=\begin{cases} 0 & \text{ if } x{_{i}} \notin KNN(x{_{j}})\&x{_{j}} \in KNN(x{_{i}}) \\ exp(-\frac{||x{_{i}}-x{_{j}}||^2}{2\sigma ^2}) & \text{ if } x{_{i}} \in KNN(x{_{j}}) |x{_{j}} \in KNN(x{_{i}}) \\ \end{cases}](https://private.codecogs.com/gif.latex?W%7B_%7Bij%7D%7D%3DW%7B_%7Bji%7D%7D%3D%5Cbegin%7Bcases%7D%200%20%26%20%5Ctext%7B%20if%20%7D%20x%7B_%7Bi%7D%7D%20%5Cnotin%20KNN%28x%7B_%7Bj%7D%7D%29%5C%26x%7B_%7Bj%7D%7D%20%5Cin%20KNN%28x%7B_%7Bi%7D%7D%29%20%5C%5C%20exp%28-%5Cfrac%7B%7C%7Cx%7B_%7Bi%7D%7D-x%7B_%7Bj%7D%7D%7C%7C%5E2%7D%7B2%5Csigma%20%5E2%7D%29%20%26%20%5Ctext%7B%20if%20%7D%20x%7B_%7Bi%7D%7D%20%5Cin%20KNN%28x%7B_%7Bj%7D%7D%29%20%7Cx%7B_%7Bj%7D%7D%20%5Cin%20KNN%28x%7B_%7Bi%7D%7D%29%20%5C%5C%20%5Cend%7Bcases%7D)
+
+第二种方式：
+
+​                      ![W{_{ij}}=W{_{ji}}=\begin{cases} 0 & \text{ if } x{_{i}} \notin KNN(x{_{j}})|x{_{j}} \notin KNN(x{_{i}}) \\ exp(-\frac{||x{_{i}}-x{_{j}}||^2}{2\sigma ^2}) & \text{ if } x{_{i}} \in KNN(x{_{j}}) \& x{_{j}} \in KNN(x{_{i}}) \\ \end{cases}](https://private.codecogs.com/gif.latex?W%7B_%7Bij%7D%7D%3DW%7B_%7Bji%7D%7D%3D%5Cbegin%7Bcases%7D%200%20%26%20%5Ctext%7B%20if%20%7D%20x%7B_%7Bi%7D%7D%20%5Cnotin%20KNN%28x%7B_%7Bj%7D%7D%29%7Cx%7B_%7Bj%7D%7D%20%5Cnotin%20KNN%28x%7B_%7Bi%7D%7D%29%20%5C%5C%20exp%28-%5Cfrac%7B%7C%7Cx%7B_%7Bi%7D%7D-x%7B_%7Bj%7D%7D%7C%7C%5E2%7D%7B2%5Csigma%20%5E2%7D%29%20%26%20%5Ctext%7B%20if%20%7D%20x%7B_%7Bi%7D%7D%20%5Cin%20KNN%28x%7B_%7Bj%7D%7D%29%20%5C%26%20x%7B_%7Bj%7D%7D%20%5Cin%20KNN%28x%7B_%7Bi%7D%7D%29%20%5C%5C%20%5Cend%7Bcases%7D)
+
+**（3）fully connected graph:**
+
+该方法就是在算法描述中的高斯相似度方法，公式如下：
+
+​                     ![W{_{ij}}=W{_{ji}}=\sum_{i=1,j=1}^{n}exp\frac{-||x{_{i}}-x{_{j}}||^2}{2\sigma ^2}](https://private.codecogs.com/gif.latex?W%7B_%7Bij%7D%7D%3DW%7B_%7Bji%7D%7D%3D%5Csum_%7Bi%3D1%2Cj%3D1%7D%5E%7Bn%7Dexp%5Cfrac%7B-%7C%7Cx%7B_%7Bi%7D%7D-x%7B_%7Bj%7D%7D%7C%7C%5E2%7D%7B2%5Csigma%20%5E2%7D)
+
+该方法也是最常用的方法，在sklearn中默认的也是该方法，表示任意两个样本点都有相似度，但是距离较远的样本点之间相似度较低，甚至可以忽略。这里面的参数![\sigma](algorithm.assets/gif-1598506971284.gif)控制着样本点的邻域宽度，即![\sigma](algorithm.assets/gif-1598506971284.gif)越大表示样本点与距离较远的样本点的相似度越大，反之亦然。
+
+##### 1.3.2 拉普拉斯矩阵介绍
+
+对于谱聚类来说最重要的工具就是拉普拉斯矩阵了，下面我们来介绍拉普拉斯矩阵的三种表示方法。
+
+**（1）未标准化的拉普拉斯矩阵：**
+
+未标准化的拉普拉斯矩阵定义如下：
+
+​                   ![L=D-W](https://private.codecogs.com/gif.latex?L%3DD-W)
+
+其中W是上节所说的相似度矩阵，D是度矩阵，在算法描述中有介绍。很显然，W与D都是对称矩阵。
+
+未标准化的拉普拉斯矩阵L满足下面几个性质：
+
+**（a）**对任意一个向量![f(f \in R^n)](https://private.codecogs.com/gif.latex?f%28f%20%5Cin%20R%5En%29)都有：
+
+​                  ![f^TLf=\frac{1}{2} \sum_{i,j=1}^{n}w{_{ij}}(f{_{i}}-f{_{j}})^2](https://private.codecogs.com/gif.latex?f%5ETLf%3D%5Cfrac%7B1%7D%7B2%7D%20%5Csum_%7Bi%2Cj%3D1%7D%5E%7Bn%7Dw%7B_%7Bij%7D%7D%28f%7B_%7Bi%7D%7D-f%7B_%7Bj%7D%7D%29%5E2)
+
+证明如下：
+
+​               ![f^TLf=f^TDf-f^TWf=\sum_{i=1}^{n}d{_{i}}f{_{i}}^2-\sum_{i,j=1}^{n}f{_{i}}f{_{j}}w{_{ij}}](algorithm.assets/gif-1598506971360.gif)
+
+​                          ![=\frac{1}{2}(algorithm.assets/gif-1598506971614.gif)=\frac{1}{2}\sum_{i,j=1}^{n}w{_{ij}}(f{_{i}}-f{_{j}})^2](https://private.codecogs.com/gif.latex?%3D%5Cfrac%7B1%7D%7B2%7D%28%5Csum_%7Bi%3D1%7D%5E%7Bn%7Dd%7B_%7Bi%7D%7Df%7B_%7Bi%7D%7D%5E2-2%5Csum_%7Bi%2Cj%3D1%7D%5E%7Bn%7Df%7B_%7Bi%7D%7Df%7B_%7Bj%7D%7Dw%7B_%7Bij%7D%7D&plus;%5Csum_%7Bj%3D1%7D%5E%7Bn%7Dd%7B_%7Bj%7D%7Df%7B_%7Bj%7D%7D%5E2%29%3D%5Cfrac%7B1%7D%7B2%7D%5Csum_%7Bi%2Cj%3D1%7D%5E%7Bn%7Dw%7B_%7Bij%7D%7D%28f%7B_%7Bi%7D%7D-f%7B_%7Bj%7D%7D%29%5E2)
+
+**（b）**L是对称的和半正定的，证明如下：
+
+因为![w{_{ij}}\geq 0](https://private.codecogs.com/gif.latex?w%7B_%7Bij%7D%7D%5Cgeq%200)，所以![f^TLf\geq 0](https://private.codecogs.com/gif.latex?f%5ETLf%5Cgeq%200)，所以为半正定矩阵。由于W和D都是对称矩阵，所以L为对称矩阵。
+
+**（c）**L最小的特征值为0，且特征值0所对应的特征向量为全1向量，证明如下：
+
+令![\bar{1}](algorithm.assets/gif-1598506971912.gif)表示![n*1](algorithm.assets/gif-1598506971805.gif)的全1向量，则
+
+​               ![L\cdot \bar{1}=(D-W)\cdot \bar{1}=D\cdot \bar{1}-W\cdot \bar{1}=0\cdot \bar{1}](https://private.codecogs.com/gif.latex?L%5Ccdot%20%5Cbar%7B1%7D%3D%28D-W%29%5Ccdot%20%5Cbar%7B1%7D%3DD%5Ccdot%20%5Cbar%7B1%7D-W%5Ccdot%20%5Cbar%7B1%7D%3D0%5Ccdot%20%5Cbar%7B1%7D)
+
+由D和W的定义可以得出上式。
+
+**（d）**L有n个非负的实数特征值：![0=\lambda{_{1}}\leq \lambda{_{2}}\leq ...\leq \lambda{_{n}}](https://private.codecogs.com/gif.latex?0%3D%5Clambda%7B_%7B1%7D%7D%5Cleq%20%5Clambda%7B_%7B2%7D%7D%5Cleq%20...%5Cleq%20%5Clambda%7B_%7Bn%7D%7D)
+
+**（2）标准化拉普拉斯矩阵**
+
+标准化拉普拉斯矩阵有两种表示方法，一是基于随机游走（Random Walk）的标准化拉普拉斯矩阵![L{_{rw}}](algorithm.assets/gif-1598506972123.gif)和对称标准化拉普拉斯矩阵![L{_{sym}}](algorithm.assets/gif-1598506972214.gif)，定义如下：
+
+​              ![L{_{rw}}=D^{-1}L=I-D^{-1}W](algorithm.assets/gif-1598506972279.gif)
+
+​              ![L{_{sym}}=D^{-1/2}LD^{-1/2}=I-D^{-1/2}WD^{-1/2}](algorithm.assets/gif-1598506972330.gif)
+
+标准化的拉普拉斯矩阵满足如下性质：
+
+**（a）**对任意一个向量![f(f \in R^n)](https://private.codecogs.com/gif.latex?f%28f%20%5Cin%20R%5En%29)都有：
+
+​             ![f^TL{_{rw}}f=f^TL{_{sym}}f=\frac{1}{2}\sum_{i,j=1}^{n}w{_{ij}}(algorithm.assets/gif-1598506973485.gif)^2](https://private.codecogs.com/gif.latex?f%5ETL%7B_%7Brw%7D%7Df%3Df%5ETL%7B_%7Bsym%7D%7Df%3D%5Cfrac%7B1%7D%7B2%7D%5Csum_%7Bi%2Cj%3D1%7D%5E%7Bn%7Dw%7B_%7Bij%7D%7D%28%5Cfrac%7Bf%7B_%7Bi%7D%7D%7D%7B%5Csqrt%7Bd%7B_%7Bi%7D%7D%7D%7D-%5Cfrac%7Bf%7B_%7Bj%7D%7D%7D%7B%5Csqrt%7Bd%7B_%7Bj%7D%7D%7D%7D%29%5E2)
+
+**（b）**当且仅当![\lambda](algorithm.assets/gif-1598506972430.gif)是![L{_{sym}}](algorithm.assets/gif-1598506972214.gif)的特征值，对应的特征向量为![w=D^{1/2}u](algorithm.assets/gif-1598506972508.gif)时，则![\lambda](algorithm.assets/gif-1598506972430.gif)是![L{_{rw}}](algorithm.assets/gif-1598506972123.gif)特征值，对应的特征向量为u；
+
+**（c）**当且仅当![Lu=\lambda Du](https://private.codecogs.com/gif.latex?Lu%3D%5Clambda%20Du)时，![\lambda](https://private.codecogs.com/gif.latex?%5Clambda)是![L{_{rw}}](https://private.codecogs.com/gif.latex?L%7B_%7Brw%7D%7D)的特征值，对应的特征向量为u；
+
+**（d）**0是![L{_{rw}}](algorithm.assets/gif-1598506972123.gif)的特征值，对应的特征向量为![\bar{1}](algorithm.assets/gif-1598506971912.gif)，![\bar{1}](algorithm.assets/gif-1598506971912.gif)为![n*1](algorithm.assets/gif-1598506971805.gif)的全1向量；0也是![L{_{sym}}](algorithm.assets/gif-1598506972214.gif)的特征值，对应的特征向量为![D^{1/2}\bar{1}](algorithm.assets/gif-1598506972818.gif)；
+
+**（e）**![L{_{sym}}](https://private.codecogs.com/gif.latex?L%7B_%7Bsym%7D%7D)和![L{_{rw}}](https://private.codecogs.com/gif.latex?L%7B_%7Brw%7D%7D)是半正定矩阵并且有非负实数特征值：![0=\lambda{_{1}}\leq \lambda{_{2}} \leq ...\leq \lambda{_{n}}](https://private.codecogs.com/gif.latex?0%3D%5Clambda%7B_%7B1%7D%7D%5Cleq%20%5Clambda%7B_%7B2%7D%7D%20%5Cleq%20...%5Cleq%20%5Clambda%7B_%7Bn%7D%7D).
+
+关于各个版本的谱聚类算法的不同之处，就是在于相似度矩阵的计算方式不同和拉普拉斯矩阵的表示方法不同，其它步骤基本相同。下面就来介绍关于谱聚类的两个比较流行的标准化算法。
+
+#### 1.4 标准化谱聚类算法介绍
+
+##### 1.4.1 随机游走拉普拉斯矩阵的谱聚类算法描述
+
+输入：n个样本点![X=\left \{ x{_{1}},x{_{2}},...,x{_{n}} \right \}](https://private.codecogs.com/gif.latex?X%3D%5Cleft%20%5C%7B%20x%7B_%7B1%7D%7D%2Cx%7B_%7B2%7D%7D%2C...%2Cx%7B_%7Bn%7D%7D%20%5Cright%20%5C%7D)和聚类簇的数目k；
+
+输出：聚类簇![A{_{1}},A{_{2}},...,A{_{k}}](https://private.codecogs.com/gif.latex?A%7B_%7B1%7D%7D%2CA%7B_%7B2%7D%7D%2C...%2CA%7B_%7Bk%7D%7D)
+
+（1）计算![n*n](https://private.codecogs.com/gif.latex?n*n)的相似度矩阵W；
+
+（2）计算度矩阵D；
+
+（3）计算拉普拉斯矩阵![{\color{Red} L{_{rw}}=D^{-1}L=D^{-1}(D-W)}](https://private.codecogs.com/gif.latex?%7B%5Ccolor%7BRed%7D%20L%7B_%7Brw%7D%7D%3DD%5E%7B-1%7DL%3DD%5E%7B-1%7D%28D-W%29%7D)；
+
+（4）计算![L{_{rw}}](https://private.codecogs.com/gif.latex?L%7B_%7Brw%7D%7D)的特征值，将特征值从小到大排序，取前k个特征值，并计算前k个特征值的特征向量![u{_{1}},u{_{2}},...,u{_{k}}](https://private.codecogs.com/gif.latex?u%7B_%7B1%7D%7D%2Cu%7B_%7B2%7D%7D%2C...%2Cu%7B_%7Bk%7D%7D)；
+
+（5）将上面的k个列向量组成矩阵![U=\left \{ u{_{1}},u{_{2}},...,u{_{k}} \right \}](https://private.codecogs.com/gif.latex?U%3D%5Cleft%20%5C%7B%20u%7B_%7B1%7D%7D%2Cu%7B_%7B2%7D%7D%2C...%2Cu%7B_%7Bk%7D%7D%20%5Cright%20%5C%7D)，![U\in R^{n*k}](https://private.codecogs.com/gif.latex?U%5Cin%20R%5E%7Bn*k%7D)；
+
+（6）令![y{_{i}}\in R^k](https://private.codecogs.com/gif.latex?y%7B_%7Bi%7D%7D%5Cin%20R%5Ek)是![U](https://private.codecogs.com/gif.latex?U)的第![i](https://private.codecogs.com/gif.latex?i)行的向量，其中![i=1,2,...,n](https://private.codecogs.com/gif.latex?i%3D1%2C2%2C...%2Cn)；
+
+（7）使用k-means算法将新样本点![Y=\left \{ y{_{1}},y{_{2}},...,y{_{n}} \right \}](https://private.codecogs.com/gif.latex?Y%3D%5Cleft%20%5C%7B%20y%7B_%7B1%7D%7D%2Cy%7B_%7B2%7D%7D%2C...%2Cy%7B_%7Bn%7D%7D%20%5Cright%20%5C%7D)聚类成簇![C{_{1}},C{_{2}},...,C{_{k}}](https://private.codecogs.com/gif.latex?C%7B_%7B1%7D%7D%2CC%7B_%7B2%7D%7D%2C...%2CC%7B_%7Bk%7D%7D)；
+
+（8）输出簇![A{_{1}},A{_{2}},...,A{_{k}}](https://private.codecogs.com/gif.latex?A%7B_%7B1%7D%7D%2CA%7B_%7B2%7D%7D%2C...%2CA%7B_%7Bk%7D%7D)，其中，![A{_{i}}=\left \{ j|y{_{j}} \in C{_{i}}\right \}](https://private.codecogs.com/gif.latex?A%7B_%7Bi%7D%7D%3D%5Cleft%20%5C%7B%20j%7Cy%7B_%7Bj%7D%7D%20%5Cin%20C%7B_%7Bi%7D%7D%5Cright%20%5C%7D).
+
+##### 2.4.2 对称拉普拉斯矩阵的谱聚类算法描述
+
+输入：n个样本点![X=\left \{ x{_{1}},x{_{2}},...,x{_{n}} \right \}](https://private.codecogs.com/gif.latex?X%3D%5Cleft%20%5C%7B%20x%7B_%7B1%7D%7D%2Cx%7B_%7B2%7D%7D%2C...%2Cx%7B_%7Bn%7D%7D%20%5Cright%20%5C%7D)和聚类簇的数目k；
+
+输出：聚类簇![A{_{1}},A{_{2}},...,A{_{k}}](https://private.codecogs.com/gif.latex?A%7B_%7B1%7D%7D%2CA%7B_%7B2%7D%7D%2C...%2CA%7B_%7Bk%7D%7D)
+
+（1）计算![n*n](https://private.codecogs.com/gif.latex?n*n)的相似度矩阵W；
+
+（2）计算度矩阵D；
+
+（3）计算拉普拉斯矩阵![{\color{Red} L{_{rsym}}=D^{-1/2}LD^{-1/2}=D^{-1/2}(D-W)D^{-1/2}}](https://private.codecogs.com/gif.latex?%7B%5Ccolor%7BRed%7D%20L%7B_%7Brsym%7D%7D%3DD%5E%7B-1/2%7DLD%5E%7B-1/2%7D%3DD%5E%7B-1/2%7D%28D-W%29D%5E%7B-1/2%7D%7D)；
+
+（4）计算![L{_{rw}}](https://private.codecogs.com/gif.latex?L%7B_%7Brw%7D%7D)的特征值，将特征值从小到大排序，取前k个特征值，并计算前k个特征值的特征向量![u{_{1}},u{_{2}},...,u{_{k}}](https://private.codecogs.com/gif.latex?u%7B_%7B1%7D%7D%2Cu%7B_%7B2%7D%7D%2C...%2Cu%7B_%7Bk%7D%7D)；
+
+（5）将上面的k个列向量组成矩阵![U=\left \{ u{_{1}},u{_{2}},...,u{_{k}} \right \}](https://private.codecogs.com/gif.latex?U%3D%5Cleft%20%5C%7B%20u%7B_%7B1%7D%7D%2Cu%7B_%7B2%7D%7D%2C...%2Cu%7B_%7Bk%7D%7D%20%5Cright%20%5C%7D)，![U\in R^{n*k}](https://private.codecogs.com/gif.latex?U%5Cin%20R%5E%7Bn*k%7D)；
+
+（6）令![y{_{i}}\in R^k](https://private.codecogs.com/gif.latex?y%7B_%7Bi%7D%7D%5Cin%20R%5Ek)是![U](https://private.codecogs.com/gif.latex?U)的第![i](https://private.codecogs.com/gif.latex?i)行的向量，其中![i=1,2,...,n](https://private.codecogs.com/gif.latex?i%3D1%2C2%2C...%2Cn)；
+
+（7）对于![{\color{Red} i=1,2,...,n}](https://private.codecogs.com/gif.latex?%7B%5Ccolor%7BRed%7D%20i%3D1%2C2%2C...%2Cn%7D)，将![{\color{Red} y{_{i}}\in R^k}](https://private.codecogs.com/gif.latex?%7B%5Ccolor%7BRed%7D%20y%7B_%7Bi%7D%7D%5Cin%20R%5Ek%7D)依次单位化，使得![{\color{Red} |y{_{i}}|=1}](https://private.codecogs.com/gif.latex?%7B%5Ccolor%7BRed%7D%20%7Cy%7B_%7Bi%7D%7D%7C%3D1%7D)；
+
+（8）使用k-means算法将新样本点![Y=\left \{ y{_{1}},y{_{2}},...,y{_{n}} \right \}](https://private.codecogs.com/gif.latex?Y%3D%5Cleft%20%5C%7B%20y%7B_%7B1%7D%7D%2Cy%7B_%7B2%7D%7D%2C...%2Cy%7B_%7Bn%7D%7D%20%5Cright%20%5C%7D)聚类成簇![C{_{1}},C{_{2}},...,C{_{k}}](https://private.codecogs.com/gif.latex?C%7B_%7B1%7D%7D%2CC%7B_%7B2%7D%7D%2C...%2CC%7B_%7Bk%7D%7D)；
+
+（9）输出簇![A{_{1}},A{_{2}},...,A{_{k}}](https://private.codecogs.com/gif.latex?A%7B_%7B1%7D%7D%2CA%7B_%7B2%7D%7D%2C...%2CA%7B_%7Bk%7D%7D)，其中，![A{_{i}}=\left \{ j|y{_{j}} \in C{_{i}}\right \}](https://private.codecogs.com/gif.latex?A%7B_%7Bi%7D%7D%3D%5Cleft%20%5C%7B%20j%7Cy%7B_%7Bj%7D%7D%20%5Cin%20C%7B_%7Bi%7D%7D%5Cright%20%5C%7D).
+
+上面两个标准化拉普拉斯算法加上未标准化拉普拉斯算法这三个算法中，主要用到的技巧是将原始样本点![x{_{i}}](algorithm.assets/gif-1598506973661.gif)转化为新的样本点![y{_{i}}](algorithm.assets/gif-1598506973736.gif)，然后再对新样本点使用其它的聚类算法进行聚类，在这里最后一步用到的聚类算法不一定非要是KMeans算法，也可以是其它的聚类算法，具体根据实际情况而定。在sklearn中默认是使用KMeans算法，但是由于KMeans聚类对初始聚类中心的选择比较敏感，从而导致KMeans算法不稳定，进而导致谱聚类算法不稳定，所以在sklearn中有另外一个可选项是'discretize'，该算法对初始聚类中心的选择不敏感。
+
+### 2. 谱聚类算法的优缺点
+
+#### 2.1 优点
+
+（1）当聚类的类别个数较小的时候，谱聚类的效果会很好，但是当聚类的类别个数较大的时候，则不建议使用谱聚类；
+
+（2）谱聚类算法使用了降维的技术，所以更加适用于高维数据的聚类；
+
+（3）谱聚类只需要数据之间的相似度矩阵，因此对于处理稀疏数据的聚类很有效。这点传统聚类算法（比如K-Means）很难做到
+
+（4）谱聚类算法建立在谱图理论基础上，与传统的聚类算法相比，它具有能在任意形状的样本空间上聚类且收敛于全局最优解
+
+#### 2.2 缺点
+
+（1）谱聚类对相似度图的改变和聚类参数的选择非常的敏感；
+
+（2）谱聚类适用于均衡分类问题，即各簇之间点的个数相差不大，对于簇之间点个数相差悬殊的聚类问题，谱聚类则不适用；
 
 ## 插值
 
